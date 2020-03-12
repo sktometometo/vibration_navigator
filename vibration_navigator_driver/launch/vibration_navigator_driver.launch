@@ -2,12 +2,36 @@
     <arg name="port" default="/dev/rfcomm0" />
     <arg name="baud" default="115200" />
 
+    <arg name="INPUT_TOPIC" default="next_footstep" />
+
     <node
-        name=""
+        name="vibration_navigator_serial_node"
         pkg="rosserial_python"
         type="serial_node.py"
         >
         <remap from="~port" to="$(arg port)" />
         <remap from="~baud" to="$(arg baud)" />
+    </node>
+
+    <node
+        name="vibration_navigator_driver_node"
+        pkg="vibration_navigator_driver"
+        type="vibration_navigator_driver_node"
+        >
+        <remap from="~input" to="$(arg INPUT_TOPIC)" />
+        <remap from="~output" to="vibration_navigator_serial_node/commands" />
+
+        <rosparam param="~vibrator_config">
+            - frame_id: "right_toe"
+              position:
+                x: 0.0
+                y: 0.0
+                z: 0.0
+              orientation:
+                x: 0.0
+                y: 0.0
+                z: 0.0
+                w: 1.0
+        </rosparam>
     </node>
 </launch>
