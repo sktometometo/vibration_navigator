@@ -17,3 +17,9 @@ $ roscd vibration_navigator_firmware/firmware
 $ rosrun rosserial_arduino make_libraries.py ./lib
 $ pio run -t upload --upload-port <M5Stack serial port>
 ```
+
+## ROS Interfaces of Vibration Navigator
+
+### Subscribing Topics
+
+- "~commands" ( std_msgs/UInt16MultiArray )
