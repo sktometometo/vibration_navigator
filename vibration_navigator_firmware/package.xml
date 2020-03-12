@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>vibration_navigator_firmware</name>
+  <version>0.0.0</version>
+  <description>The vibration_navigator_firmware package</description>
+
+  <maintainer email="shinjo@jsk.imi.i.u-tokyo.ac.jp">Koki Shinjo</maintainer>
+
+  <license>MIT</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <export>
+  </export>
+</package>
