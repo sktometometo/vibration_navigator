@@ -1,0 +1,13 @@
+<launch>
+    <arg name="port" default="/dev/rfcomm0" />
+    <arg name="baud" default="115200" />
+
+    <node
+        name=""
+        pkg="rosserial_python"
+        type="serial_node.py"
+        >
+        <remap from="~port" to="$(arg port)" />
+        <remap from="~baud" to="$(arg baud)" />
+    </node>
+</launch>
