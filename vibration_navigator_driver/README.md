@@ -1,5 +1,21 @@
 # vibration_navigator_driver
 
+## How to use
+
+First, you need to pair a vibration_navigator device with bluetooth.
+And you have to setup serial port with bluetooth before you actually use a vibration_navigator.
+
+```
+$ sudo rfcomm bind <index> <BD address>
+$ sudo stty -F /dev/rfcomm<index> 115200 cs8
+```
+
+And then you can use vibration_navigator_driver with launch a launch file
+
+```
+$ roslaunch vibration_navigator vibration_navigator_driver.launch port:=/dev/rfcomm<index>
+```
+
 ## ROS Nodes
 
 ### vibration_navigator_driver_node
@@ -46,5 +62,3 @@ an example is below
     z: 0.0
     w: 1.0
 ```
-
--
