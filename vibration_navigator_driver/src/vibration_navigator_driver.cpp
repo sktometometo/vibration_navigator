@@ -24,8 +24,10 @@ namespace vibration_navigator_driver {
 
     bool VibrationNavigatorDriver::init( ros::NodeHandle &nh, ros::NodeHandle &nh_private, tf2_ros::Buffer &tf_buffer )
     {
-        int num_spinthread;
-        nh_private.getParam("~num_spinthread", num_spinthread, 4);
+        int num_spinthread = 4;
+        if ( nh_private.hasParam("num_spinthread") ) {
+            nh_private.getParam("num_spinthread", num_spinthread);
+        }
 
         this->loadConfig( nh, nh_private );
 
