@@ -30,8 +30,9 @@ int num_port = 1; // max 16
 int port2pin[] = { 21 }; // port number and channel number should be the same
 
 void callbackVibrationCommands( const std_msgs::UInt16MultiArray& msg ) {
+  M5.Lcd.fillScreen(WHITE);
   M5.Lcd.setCursor(5, 5);
-  M5.Lcd.setTextSize(5);
+  M5.Lcd.setTextSize(2);
   M5.Lcd.printf("The Vibration Navigator");
   M5.Lcd.setCursor(5, 20);
   M5.Lcd.setTextSize(1.5);
