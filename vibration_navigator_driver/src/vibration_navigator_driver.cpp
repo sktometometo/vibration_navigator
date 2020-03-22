@@ -29,7 +29,9 @@ namespace vibration_navigator_driver {
             nh_private.getParam("num_spinthread", num_spinthread);
         }
 
-        this->loadConfig( nh, nh_private );
+        if ( not this->loadConfig( nh, nh_private ) ) {
+            return false;
+        }
 
         /*
          * Publisher and Subscriber generation
@@ -45,6 +47,8 @@ namespace vibration_navigator_driver {
          * ROS spinner generation
          */
         this->ptr_spinner_ = boost::shared_ptr<ros::AsyncSpinner>(new ros::AsyncSpinner(num_spinthread));
+
+        return true;
     }
 
     void VibrationNavigatorDriver::spin( ros::NodeHandle &nh, ros::NodeHandle &nh_private, tf2_ros::Buffer &tf_buffer )
@@ -79,7 +83,11 @@ namespace vibration_navigator_driver {
          *     w:
          */
         XmlRpc::XmlRpcValue posesVibrator;
-        nh_private.getParam( "vibrator_config", posesVibrator );
+        if ( nh_private.hasParam( "vibrator_config" ) ) {
+            nh_private.getParam( "vibrator_config", posesVibrator );
+        } else {
+            return false;
+        }
         ROS_ASSERT( posesVibrator.getType() == XmlRpc::XmlRpcValue::TypeArray );
 
         for ( int i = 0; i < posesVibrator.size(); i++ ) {
@@ -151,12 +159,19 @@ namespace vibration_navigator_driver {
              * これは Vibratorが全て同じ frame_id 上にあるのであれば,一回計算すれば良いので,計算速度が遅ければ
              * frame_id が全て同じになるようにする.
              */
-            geometry_msgs::TransformStamped tfs_footstep2vibrator =
+            geometry_msgs::TransformStamped tfs_footstep2vibrator;
+            try {
+            tfs_footstep2vibrator =
                 tf_buffer.lookupTransform(
                         itr->frame_id.c_str(),
                         posestamped_footstep_.header.frame_id.c_str(),
                         ros::Time(0)
                         );
+            } catch (tf2::TransformException &ex) {
+                ROS_WARN("%s",ex.what());
+                itr->current_command = 0.0;
+                continue;
+            }
             geometry_msgs::Pose pose_footstep;
             tf2::doTransform( posestamped_footstep_.pose, pose_footstep, tfs_footstep2vibrator );
             /*

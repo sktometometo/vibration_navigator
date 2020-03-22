@@ -21,6 +21,10 @@ int main( int argc, char** argv )
 
     //
     vibration_navigator_driver::VibrationNavigatorDriver driver;
-    driver.init( nh, nh_private, tf_buffer );
-    driver.spin( nh, nh_private, tf_buffer );
+    bool ret = driver.init( nh, nh_private, tf_buffer );
+    if ( ret ) {
+        driver.spin( nh, nh_private, tf_buffer );
+    } else {
+        ROS_ERROR( "Initialization failed." );
+    }
 }

@@ -3,25 +3,30 @@
     <arg name="baud" default="115200" />
 
     <arg name="INPUT_TOPIC" default="next_footstep" />
+    <arg name="COMMAND_TOPIC" default="command" />
 
     <node
         name="vibration_navigator_serial_node"
         pkg="rosserial_python"
         type="serial_node.py"
+        output="screen"
         >
-        <remap from="~port" to="$(arg port)" />
-        <remap from="~baud" to="$(arg baud)" />
+        <param name="~port" value="$(arg port)" />
+        <param name="~baud" value="$(arg baud)" />
+
+        <remap from="~commands" to="$(arg COMMAND_TOPIC)" />
     </node>
 
     <node
         name="vibration_navigator_driver_node"
         pkg="vibration_navigator_driver"
         type="vibration_navigator_driver_node"
+        output="screen"
         >
         <remap from="~input" to="$(arg INPUT_TOPIC)" />
-        <remap from="~output" to="vibration_navigator_serial_node/commands" />
+        <remap from="~output" to="$(arg COMMAND_TOPIC)" />
 
-        <rosparam param="~vibrator_config">
+        <rosparam param="vibrator_config">
             - frame_id: "right_toe"
               position:
                 x: 0.0
