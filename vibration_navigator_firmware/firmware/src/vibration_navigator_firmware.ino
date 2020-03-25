@@ -137,6 +137,8 @@ void loop() {
   msg_imu.linear_acceleration.y = imu_acc_y * g_acc;
   msg_imu.linear_acceleration.z = imu_acc_z * g_acc;
 
+  publisher_imu.publish( &msg_imu );
+
   nh.spinOnce();
 
   delay(duration_loop);
