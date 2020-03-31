@@ -18,11 +18,11 @@
 // Eigen
 #include <Eigen/Dense>
 // USER
-#include "vibration_navigator_driver/vibration_navigator_driver.h"
+#include "vibration_navigator_driver/vibration_controller.h"
 
 namespace vibration_navigator_driver {
 
-    bool VibrationNavigatorDriver::init( ros::NodeHandle &nh, ros::NodeHandle &nh_private, tf2_ros::Buffer &tf_buffer )
+    bool VibrationController::init( ros::NodeHandle &nh, ros::NodeHandle &nh_private, tf2_ros::Buffer &tf_buffer )
     {
         int num_spinthread = 4;
         if ( nh_private.hasParam("num_spinthread") ) {
@@ -37,10 +37,10 @@ namespace vibration_navigator_driver {
          * Publisher and Subscriber generation
          */
         this->publisher_commands_ = nh_private.advertise<std_msgs::UInt16MultiArray>("output",10);
-        this->subscriber_footstep_ = nh_private.subscribe<geometry_msgs::PoseStamped,VibrationNavigatorDriver>(
+        this->subscriber_footstep_ = nh_private.subscribe<geometry_msgs::PoseStamped,VibrationController>(
                 "input",
                 10,
-                &VibrationNavigatorDriver::callback,
+                &VibrationController::callback,
                 this );
 
         /*
@@ -51,7 +51,7 @@ namespace vibration_navigator_driver {
         return true;
     }
 
-    void VibrationNavigatorDriver::spin( ros::NodeHandle &nh, ros::NodeHandle &nh_private, tf2_ros::Buffer &tf_buffer )
+    void VibrationController::spin( ros::NodeHandle &nh, ros::NodeHandle &nh_private, tf2_ros::Buffer &tf_buffer )
     {
         // start ROS spin thread
         this->ptr_spinner_->start();
@@ -66,7 +66,7 @@ namespace vibration_navigator_driver {
         }
     }
 
-    bool VibrationNavigatorDriver::loadConfig( ros::NodeHandle &nh, ros::NodeHandle &nh_private )
+    bool VibrationController::loadConfig( ros::NodeHandle &nh, ros::NodeHandle &nh_private )
     {
         /*
          * each field of the list in the parameter should be like below.
@@ -119,12 +119,12 @@ namespace vibration_navigator_driver {
         return true;
     }
 
-    void VibrationNavigatorDriver::callback( geometry_msgs::PoseStamped msg )
+    void VibrationController::callback( geometry_msgs::PoseStamped msg )
     {
          this->posestamped_footstep_ = msg;
     }
 
-    void VibrationNavigatorDriver::publishVibratorCommands()
+    void VibrationController::publishVibratorCommands()
     {
         std_msgs::UInt16MultiArray msg;
         for ( auto itr = this->vector_vibrators_.begin(); itr != this->vector_vibrators_.end(); itr++ ) {
@@ -133,7 +133,7 @@ namespace vibration_navigator_driver {
         this->publisher_commands_.publish(msg);
     }
 
-    void VibrationNavigatorDriver::updateVibratorCommands(
+    void VibrationController::updateVibratorCommands(
             ros::NodeHandle &nh,
             ros::NodeHandle &nh_private,
             tf2_ros::Buffer &tf_buffer )
@@ -201,7 +201,7 @@ namespace vibration_navigator_driver {
         }
     }
 
-    double VibrationNavigatorDriver::calcVibrationPower( double distance, double theta, double k )
+    double VibrationController::calcVibrationPower( double distance, double theta, double k )
     {
         return k / ( distance * distance );
     }

@@ -1,5 +1,5 @@
-#ifndef VIBRATION_NAVIGATOR_DRIVER_H__
-#define VIBRATION_NAVIGATOR_DRIVER_H__
+#ifndef VIBRATION_NAVIGATOR_DRIVER_VIBRATION_CONTROLLER_H__
+#define VIBRATION_NAVIGATOR_DRIVER_VIBRATION_CONTROLLER_H__
 
 // Standaerd C++ Library
 #include <iostream>
@@ -40,10 +40,10 @@ namespace vibration_navigator_driver {
 
 
     /**
-     * @brief The VibrationNavigatorDriver class is a wrapper node to calculate commands of each vibrator
+     * @brief The VibrationController class is a wrapper node to calculate commands of each vibrator
      * from a given target footstep pose.
      */
-    class VibrationNavigatorDriver
+    class VibrationController
     {
         public:
 

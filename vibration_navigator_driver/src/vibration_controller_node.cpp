@@ -2,7 +2,7 @@
 #include <ros/ros.h>
 #include <tf2_ros/transform_listener.h>
 // USER
-#include "vibration_navigator_driver/vibration_navigator_driver.h"
+#include "vibration_navigator_driver/vibration_controller.h"
 
 int main( int argc, char** argv )
 {
@@ -20,7 +20,7 @@ int main( int argc, char** argv )
     tf2_ros::TransformListener tf_listener(tf_buffer);
 
     //
-    vibration_navigator_driver::VibrationNavigatorDriver driver;
+    vibration_navigator_driver::VibrationController driver;
     bool ret = driver.init( nh, nh_private, tf_buffer );
     if ( ret ) {
         driver.spin( nh, nh_private, tf_buffer );

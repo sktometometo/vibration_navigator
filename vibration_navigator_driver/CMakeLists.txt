@@ -5,6 +5,7 @@ add_compile_options(-std=c++11)
 
 find_package(catkin REQUIRED COMPONENTS
     geometry_msgs
+    sensor_msgs
     std_msgs
     roscpp
     rospy
@@ -23,6 +24,7 @@ catkin_package(
     LIBRARIES ${PROJECT_NAME}
     CATKIN_DEPENDS
         geometry_msgs
+        sensor_msgs
         std_msgs
         roscpp
         rospy
@@ -43,12 +45,12 @@ include_directories(
 
 #
 add_executable(
-    vibration_navigator_driver_node
-    src/vibration_navigator_driver_node.cpp
-    src/vibration_navigator_driver.cpp
+    vibration_controller_node
+    src/vibration_controller_node.cpp
+    src/vibration_controller.cpp
 )
 target_link_libraries(
-    vibration_navigator_driver_node
+    vibration_controller_node
     ${catkin_LIBRARIES}
     ${Boost_LIBRARIES}
     ${EIGEN3_LIBRARIES}
