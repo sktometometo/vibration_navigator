@@ -1,5 +1,7 @@
 // ROS
 #include <ros/ros.h>
+#include <tf2_ros/buffer.h>
+#include <tf2_ros/transform_broadcaster.h>
 #include <tf2_ros/transform_listener.h>
 // USER
 #include "vibration_navigator_driver/tfproxy.h"
@@ -22,7 +24,6 @@ int main( int argc, char** argv )
     tf2_ros::TransformBroadcaster tf_broadcaster;
 
     //
-    vibration_navigator_driver::TFProxy tfproxy;
-    tfproxy.init( nh, nh_private, tf_buffer, tf_broadcaster );
-    tfproxy.spin( nh, nh_private, tf_buffer, tf_broadcaster );
+    vibration_navigator_driver::TFProxy tfproxy( nh, nh_private, tf_buffer, tf_broadcaster );
+    tfproxy.spin();
 }
