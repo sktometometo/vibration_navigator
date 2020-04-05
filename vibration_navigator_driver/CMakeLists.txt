@@ -55,16 +55,3 @@ target_link_libraries(
     ${Boost_LIBRARIES}
     ${EIGEN3_LIBRARIES}
 )
-
-#
-add_executable(
-    tfproxy_node
-    src/tfproxy_node.cpp
-    src/tfproxy.cpp
-)
-target_link_libraries(
-    tfproxy_node
-    ${catkin_LIBRARIES}
-    ${Boost_LIBRARIES}
-    ${EIGEN3_LIBRARIES}
-)
