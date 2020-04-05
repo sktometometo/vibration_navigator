@@ -268,15 +268,20 @@ void setup()
   frame_id = (char*)malloc(BUFSIZE);
   char **hoge = &frame_id;
 
-  if ( not nh.getParam("~imu_frame_id", hoge, 1, 1000 ) ) {
+  M5.Lcd.setCursor(5, indexRow);
+  M5.Lcd.printf("Requesting parameters.");
+  nh.spinOnce();
+  if ( not nh.getParam("~imu_frame_id", hoge, 1, 10000 ) ) {
   /*
   if ( true ) {
   */
       strcpy( frame_id, "imu_frame" );
+      M5.Lcd.fillRect(5, indexRow, 2000, 10, WHITE);
       M5.Lcd.setCursor(5, indexRow);
       M5.Lcd.printf("Parameter not found.");
       indexRow += 10;
   } else {
+      M5.Lcd.fillRect(5, indexRow, 2000, 10, WHITE);
       M5.Lcd.setCursor(5, indexRow);
       M5.Lcd.printf("Parameter found.");
       indexRow += 10;
