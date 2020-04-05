@@ -9,6 +9,7 @@
     <arg name="TOPIC_IMU" default="$(arg PREFIX)_imu" />
 
     <arg name="FRAME_IMU" default="$(arg PREFIX)_imu_frame" />
+    <arg name="FRAME_MARKER" default="$(arg PREFIX)_marker_frame" />
 
     <node
         name="$(arg PREFIX)_vibration_navigator_serial_node"
@@ -38,7 +39,7 @@
         <param name="~num_spinthread" value="4" />
 
         <rosparam param="vibrator_config" subst_value="true">
-            - frame_id: "$(arg FRAME_FILTERED)"
+            - frame_id: "$(arg FRAME_MARKER)"
               position:
                 x: 0.0
                 y: 0.0
