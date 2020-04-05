@@ -138,6 +138,9 @@ namespace vibration_navigator_driver {
             ros::NodeHandle &nh_private,
             tf2_ros::Buffer &tf_buffer )
     {
+        if ( this->posestamped_footstep_.header.frame_id.length() == 0 ) {
+            return;
+        }
         for ( auto itr = this->vector_vibrators_.begin(); itr != this->vector_vibrators_.end(); itr++ ) {
             /*
              * posestamped_footstep_ に設定された仮想的な音源位置を元に
@@ -164,7 +167,7 @@ namespace vibration_navigator_driver {
             tfs_footstep2vibrator =
                 tf_buffer.lookupTransform(
                         itr->frame_id.c_str(),
-                        posestamped_footstep_.header.frame_id.c_str(),
+                        this->posestamped_footstep_.header.frame_id.c_str(),
                         ros::Time(0)
                         );
             } catch (tf2::TransformException &ex) {
@@ -173,7 +176,7 @@ namespace vibration_navigator_driver {
                 continue;
             }
             geometry_msgs::Pose pose_footstep;
-            tf2::doTransform( posestamped_footstep_.pose, pose_footstep, tfs_footstep2vibrator );
+            tf2::doTransform( this->posestamped_footstep_.pose, pose_footstep, tfs_footstep2vibrator );
             /*
              * 計算は Eigen のオブジェクトで計算するので, Vibrator.frame_id の座標系における
              * footstep と vibrator の位置姿勢を, Eigen::Vector3d と Eigen::Quaterniond で表す.
