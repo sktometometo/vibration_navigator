@@ -8,7 +8,7 @@
 #include <std_msgs/String.h>
 #include <std_msgs/UInt16MultiArray.h>
 
-#define BUFSIZE 128
+#define BUFSIZE 1024
 
 // #define USE_WIFI
 
@@ -36,13 +36,14 @@ int duration_mutex = 5;
 #ifdef USE_WIFI
 ros::NodeHandle nh;
 #else
-ros::NodeHandle_<UARTSerialHardware> nh;
+ros::NodeHandle_<UARTSerialHardware, 25, 25, 4096, 4096> nh;
 #endif
 std_msgs::UInt16MultiArray msg_vibration_commands;
 sensor_msgs::Imu msg_imu;
 ros::Subscriber<std_msgs::UInt16MultiArray> subscriber_vibration_commands( "~commands", &callbackVibrationCommands);
 ros::Publisher publisher_imu( "~imu", &msg_imu );
-char frame_id[BUFSIZE];
+//char frame_id[BUFSIZE];
+char* frame_id;
 
 // task handler
 TaskHandle_t xHandle = NULL;
@@ -176,6 +177,29 @@ void setup()
   indexRow += 15;
 
   /**
+   * Print battery level
+   */
+  M5.Lcd.fillRect(5, indexRow, 2000, 10, WHITE);
+  M5.Lcd.setCursor(5, indexRow);
+  M5.Lcd.printf("Battery level: %d / 100", M5.Power.getBatteryLevel());
+  indexRow += 10;
+  delay(1000);
+
+  /**
+   * Deep sleeping...
+   */
+  if ( M5.Power.getBatteryLevel() < 10 ) {
+      M5.Lcd.fillRect(5, indexRow, 2000, 10, WHITE);
+      M5.Lcd.setCursor(5, indexRow);
+      M5.Lcd.printf("Deep sleeping....");
+      indexRow += 10;
+      delay(5000);
+      while ( true ) {
+          M5.Power.deepSleep( 10000 );
+      }
+  }
+
+  /**
    * ROS Initialization
    */
 #ifdef USE_WIFI
@@ -197,8 +221,11 @@ void setup()
   indexRow += 10;
 
   nh.getHardware()->setConnection(server);
+  nh.initNode();
+  nh.subscribe( subscriber_vibration_commands );
+  nh.advertise( publisher_imu );
   while ( true ) {
-      nh.initNode();
+      nh.spinOnce();
       M5.Lcd.fillRect(5, indexRow, 2000, 10, WHITE);
       M5.Lcd.setCursor(5, indexRow);
       M5.Lcd.printf("Wainting for Server connection.");
@@ -207,6 +234,7 @@ void setup()
           M5.Lcd.setCursor(5, indexRow);
           M5.Lcd.printf("Server connected.");
           delay(1000);
+          indexRow += 10;
           break;
       } else {
           for ( int i=0; i<10; i++ ) {
@@ -215,21 +243,50 @@ void setup()
           }
       }
   }
-  indexRow += 10;
 #else
   Serial.begin(115200);
   nh.initNode();
-#endif
-
-  if ( not nh.getParam("~imu_frame_id", (char**)&frame_id), 1, 10000 ) {
-      strcpy( frame_id, "imu_frame" );
-  }
-  msg_imu.header.frame_id = frame_id;
   nh.subscribe( subscriber_vibration_commands );
   nh.advertise( publisher_imu );
+  while ( not nh.connected() ) {
+      nh.spinOnce();
+      M5.Lcd.fillRect(5, indexRow, 2000, 10, WHITE);
+      M5.Lcd.setCursor(5, indexRow);
+      M5.Lcd.printf("Wainting for Serial connection.");
+      for ( int i=0; i<10; i++ ) {
+          delay(100);
+          M5.Lcd.printf(".");
+      }
+  }
+  M5.Lcd.fillRect(5, indexRow, 2000, 10, WHITE);
+  M5.Lcd.setCursor(5, indexRow);
+  M5.Lcd.printf("Serial connected.");
+  indexRow += 10;
+  delay(1000);
+#endif
+
+  frame_id = (char*)malloc(BUFSIZE);
+  char **hoge = &frame_id;
+
+  if ( not nh.getParam("~imu_frame_id", hoge, 1, 1000 ) ) {
+  /*
+  if ( true ) {
+  */
+      strcpy( frame_id, "imu_frame" );
+      M5.Lcd.setCursor(5, indexRow);
+      M5.Lcd.printf("Parameter not found.");
+      indexRow += 10;
+  } else {
+      M5.Lcd.setCursor(5, indexRow);
+      M5.Lcd.printf("Parameter found.");
+      indexRow += 10;
+  }
+
+  msg_imu.header.frame_id = frame_id;
+
 
   /**
-   * x
+   * mutex initialization
    */
   xMutex = xSemaphoreCreateMutex();
 

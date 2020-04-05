@@ -11,6 +11,8 @@
     <arg name="FRAME_IMU" default="$(arg PREFIX)_imu_frame" />
     <arg name="FRAME_MARKER" default="$(arg PREFIX)_marker_frame" />
 
+    <arg name="USE_CONTROLLER_NODE" default="true" />
+
     <node
         name="$(arg PREFIX)_vibration_navigator_serial_node"
         pkg="rosserial_python"
@@ -31,6 +33,7 @@
         pkg="vibration_navigator_driver"
         type="vibration_controller_node"
         output="screen"
+        if="$(arg USE_CONTROLLER_NODE)"
         >
         <remap from="~input" to="$(arg TOPIC_INPUT)" />
         <remap from="~output" to="$(arg TOPIC_COMMAND)" />
