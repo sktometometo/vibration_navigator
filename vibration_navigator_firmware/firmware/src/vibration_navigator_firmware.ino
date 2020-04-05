@@ -2,18 +2,11 @@
 #define M5STACK_200Q
 // M5Stack and ESP32 headers
 #include <M5Stack.h>
-#include "BluetoothSerial.h"
 // ROS related headers
 #include <ros.h>
 #include <sensor_msgs/Imu.h>
 #include <std_msgs/String.h>
 #include <std_msgs/UInt16MultiArray.h>
-// USER
-#include "bluetooth_hardware.h"
-
-#if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
-#error Bluetooth is not enabled! Please run `make menuconfig` to and enable it
-#endif
 
 #define BUFSIZE 128
 
@@ -23,11 +16,13 @@ const float g_acc = 9.80665;
 void callbackVibrationCommands( const std_msgs::UInt16MultiArray& );
 
 // parameters
-char BluetoothName[] = "M5Stack Vibration Navigator";
+const char* ssid = "RichardPhillipsFeynman";
+const char* password = "joshin412403";
+IPAddress server(192,168,10,53);
 int duration_loop = 5; // [ms]
 
 // ROSresources
-ros::NodeHandle_<BluetoothHardware> nh;
+ros::NodeHandle nh;
 std_msgs::UInt16MultiArray msg_vibration_commands;
 sensor_msgs::Imu msg_imu;
 ros::Subscriber<std_msgs::UInt16MultiArray> subscriber_vibration_commands( "~commands", &callbackVibrationCommands);
@@ -152,7 +147,42 @@ void setup()
   /**
    * ROS Initialization
    */
-  nh.initNode( BluetoothName );
+  int status = WiFi.begin(ssid,password);
+  while ( status  != WL_CONNECTED ) {
+      M5.Lcd.fillRect(5, 20, 2000, 10, WHITE);
+      M5.Lcd.setCursor(5, 20);
+      M5.Lcd.printf("Waiting for WiFiConnection....");
+      for ( int i=0; i<10; i++ ) {
+          delay(100);
+          M5.Lcd.printf(".");
+      }
+      status = WiFi.begin(ssid,password);
+  }
+  M5.Lcd.fillRect(5, 20, 2000, 10, WHITE);
+  M5.Lcd.setCursor(5, 20);
+  M5.Lcd.printf("WiFi connected.");
+  delay(1000);
+
+  nh.getHardware()->setConnection(server);
+  while ( true ) {
+      nh.initNode();
+      M5.Lcd.fillRect(5, 30, 2000, 10, WHITE);
+      M5.Lcd.setCursor(5, 30);
+      M5.Lcd.printf("Wainting for Server connection.");
+      if ( nh.getHardware()->connected() ) {
+          M5.Lcd.fillRect(5, 30, 2000, 10, WHITE);
+          M5.Lcd.setCursor(5, 30);
+          M5.Lcd.printf("Server connected.");
+          delay(1000);
+          break;
+      } else {
+          for ( int i=0; i<10; i++ ) {
+              delay(100);
+              M5.Lcd.printf(".");
+          }
+      }
+  }
+
   if ( not nh.getParam("~imu_frame_id", (char**)&frame_id) ) {
       strcpy( frame_id, "imu_frame" );
   }
@@ -177,9 +207,9 @@ void setup()
           &xHandle,
           1 );
 
-  M5.Lcd.printf("Initialized\n");
-  M5.Lcd.printf("Please pair with \"%s\"\n", BluetoothName);
-  M5.Lcd.printf("Main loop started\n");
+  M5.Lcd.setCursor(5, 40);
+  M5.Lcd.printf("Initialization finished. Main loop started.");
+  delay(1000);
 
   startTime = millis();
 }
@@ -189,7 +219,7 @@ void loop()
     if ( counterROS % 100 == 0 ) {
         M5.Lcd.fillRect(5, 50, 2000, 10, WHITE);
         M5.Lcd.setCursor(5, 50);
-        M5.Lcd.printf("[%d s] ROS loop: %d, IMU loop: %d\n", (millis() - startTime)/1000, counterROS, counterIMU);
+        M5.Lcd.printf("[%lu s] ROS loop: %d, IMU loop: %d\n", (millis() - startTime)/1000, counterROS, counterIMU);
     }
     if ( xBinarySemaphore != NULL ) {
         if ( xSemaphoreTake( xBinarySemaphore, ( TickType_t ) 10 ) == pdTRUE ) {
@@ -197,6 +227,7 @@ void loop()
             xSemaphoreGive( xBinarySemaphore );
         }
     }
+    nh.spinOnce();
     nh.spinOnce();
     delay(duration_loop);
     ++counterROS;
