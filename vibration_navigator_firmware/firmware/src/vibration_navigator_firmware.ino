@@ -221,7 +221,7 @@ void setup()
   nh.initNode();
 #endif
 
-  if ( not nh.getParam("~imu_frame_id", (char**)&frame_id) ) {
+  if ( not nh.getParam("~imu_frame_id", (char**)&frame_id), 1, 10000 ) {
       strcpy( frame_id, "imu_frame" );
   }
   msg_imu.header.frame_id = frame_id;
