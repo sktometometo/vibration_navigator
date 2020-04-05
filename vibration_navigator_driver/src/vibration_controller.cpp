@@ -33,6 +33,11 @@ namespace vibration_navigator_driver {
             return false;
         }
 
+        /**
+         *
+         */
+        this->posestamped_footstep_.header.frame_id = "";
+
         /*
          * Publisher and Subscriber generation
          */
