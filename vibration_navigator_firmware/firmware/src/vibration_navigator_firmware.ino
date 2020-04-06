@@ -10,7 +10,12 @@
 
 #define BUFSIZE 1024
 
+// #define USE_BLUETOOTH
 // #define USE_WIFI
+
+#ifdef USE_BLUETOOTH
+#include "bluetooth_hardware.h"
+#endif
 
 #ifndef USE_WIFI
 #include "uartserial_hardware.h"
@@ -27,6 +32,8 @@ void callbackVibrationCommands( const std_msgs::UInt16MultiArray& );
 const char* ssid = "RichardPhillipsFeynman";
 const char* password = "joshin412403";
 IPAddress server(192,168,10,53);
+#elif defined(USE_BLUETOOTH)
+char* BluetoothName = "VibrationNavigator";
 #endif
 int duration_loop = 10; // [ms]
 int duration_imu = 10;
@@ -35,6 +42,8 @@ int duration_mutex = 5;
 // ROSresources
 #ifdef USE_WIFI
 ros::NodeHandle nh;
+#elif defined(USE_BLUETOOTH)
+ros::NodeHandle_<BluetoothHardware> nh;
 #else
 ros::NodeHandle_<UARTSerialHardware, 25, 25, 4096, 4096> nh;
 #endif
@@ -243,6 +252,25 @@ void setup()
           }
       }
   }
+#elif defined(USE_BLUETOOTH)
+  nh.initNode( BluetoothName );
+  nh.subscribe( subscriber_vibration_commands );
+  nh.advertise( publisher_imu );
+  while ( not nh.connected() ) {
+      nh.spinOnce();
+      M5.Lcd.fillRect(5, indexRow, 2000, 10, WHITE);
+      M5.Lcd.setCursor(5, indexRow);
+      M5.Lcd.printf("Wainting for Serial connection.");
+      for ( int i=0; i<10; i++ ) {
+          delay(100);
+          M5.Lcd.printf(".");
+      }
+  }
+  M5.Lcd.fillRect(5, indexRow, 2000, 10, WHITE);
+  M5.Lcd.setCursor(5, indexRow);
+  M5.Lcd.printf("Serial connected.");
+  indexRow += 10;
+  delay(1000);
 #else
   Serial.begin(115200);
   nh.initNode();
