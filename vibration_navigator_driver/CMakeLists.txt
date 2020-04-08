@@ -4,6 +4,7 @@ project(vibration_navigator_driver)
 add_compile_options(-std=c++11)
 
 find_package(catkin REQUIRED COMPONENTS
+    dynamic_reconfigure
     geometry_msgs
     sensor_msgs
     std_msgs
@@ -19,10 +20,15 @@ find_package(Boost REQUIRED
 
 find_package(Eigen3 REQUIRED)
 
+generate_dynamic_reconfigure_options(
+    cfg/WalkingStatusServer.cfg
+)
+
 catkin_package(
     INCLUDE_DIRS include
     LIBRARIES ${PROJECT_NAME}
     CATKIN_DEPENDS
+        dynamic_reconfigure
         geometry_msgs
         sensor_msgs
         std_msgs
