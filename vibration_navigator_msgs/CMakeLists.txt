@@ -11,6 +11,8 @@ find_package(catkin REQUIRED COMPONENTS
 
 add_message_files(
   FILES
+  ImuSpectrum.msg
+  Power.msg
   WalkingStatus.msg
 )
 
