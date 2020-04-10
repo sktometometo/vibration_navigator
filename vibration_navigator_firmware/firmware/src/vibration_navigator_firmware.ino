@@ -1,7 +1,8 @@
 //
-#define M5STACK_200Q
-// M5Stack and ESP32 headers
-#include <M5Stack.h>
+//#define M5STACK_200Q
+//// M5Stack and ESP32 headers
+//#include <M5Stack.h>
+#include <M5StickC.h>
 // ROS related headers
 #include <ros.h>
 #include <sensor_msgs/Imu.h>
@@ -163,7 +164,7 @@ void setup()
    * M5 Stack initialization
    */
   M5.begin();
-  M5.Power.begin();
+  //M5.Power.begin();
   M5.IMU.Init();
 
   /**
@@ -177,29 +178,31 @@ void setup()
   /**
    * Lcd display
    */
+  M5.Lcd.setRotation(3);
   M5.Lcd.fillScreen(WHITE);
   M5.Lcd.setTextColor(BLACK);
-  M5.Lcd.setCursor(5, indexRow);
-  M5.Lcd.setTextSize(2);
+  M5.Lcd.setCursor(1, indexRow);
+  M5.Lcd.setTextSize(1);
   M5.Lcd.printf("The Vibration Navigator\n");
   M5.Lcd.setTextSize(1);
-  indexRow += 15;
+  indexRow += 10;
 
   /**
    * Print battery level
    */
-  M5.Lcd.fillRect(5, indexRow, 2000, 10, WHITE);
-  M5.Lcd.setCursor(5, indexRow);
-  M5.Lcd.printf("Battery level: %d / 100", M5.Power.getBatteryLevel());
+  M5.Lcd.fillRect(1, indexRow, 2000, 10, WHITE);
+  M5.Lcd.setCursor(1, indexRow);
+  M5.Lcd.printf("Bat. Vol.: %.1f V", M5.Axp.GetBatVoltage());
   indexRow += 10;
   delay(1000);
 
   /**
    * Deep sleeping...
    */
+  /*
   if ( M5.Power.getBatteryLevel() < 10 ) {
-      M5.Lcd.fillRect(5, indexRow, 2000, 10, WHITE);
-      M5.Lcd.setCursor(5, indexRow);
+      M5.Lcd.fillRect(1, indexRow, 2000, 10, WHITE);
+      M5.Lcd.setCursor(1, indexRow);
       M5.Lcd.printf("Deep sleeping....");
       indexRow += 10;
       delay(5000);
@@ -207,6 +210,7 @@ void setup()
           M5.Power.deepSleep( 10000 );
       }
   }
+  */
 
   /**
    * ROS Initialization
@@ -214,17 +218,17 @@ void setup()
 #ifdef USE_WIFI
   int status = WiFi.begin(ssid,password);
   while ( status  != WL_CONNECTED ) {
-      M5.Lcd.fillRect(5, indexRow, 2000, 10, WHITE);
-      M5.Lcd.setCursor(5, indexRow);
-      M5.Lcd.printf("Waiting for WiFiConnection....");
+      M5.Lcd.fillRect(1, indexRow, 2000, 10, WHITE);
+      M5.Lcd.setCursor(1, indexRow);
+      M5.Lcd.printf("WiFiCon. waiting...");
       for ( int i=0; i<10; i++ ) {
           delay(100);
           M5.Lcd.printf(".");
       }
       status = WiFi.begin(ssid,password);
   }
-  M5.Lcd.fillRect(5, indexRow, 2000, 10, WHITE);
-  M5.Lcd.setCursor(5, indexRow);
+  M5.Lcd.fillRect(1, indexRow, 2000, 10, WHITE);
+  M5.Lcd.setCursor(1, indexRow);
   M5.Lcd.printf("WiFi connected.");
   delay(1000);
   indexRow += 10;
@@ -235,12 +239,12 @@ void setup()
   nh.advertise( publisher_imu );
   while ( true ) {
       nh.spinOnce();
-      M5.Lcd.fillRect(5, indexRow, 2000, 10, WHITE);
-      M5.Lcd.setCursor(5, indexRow);
-      M5.Lcd.printf("Wainting for Server connection.");
+      M5.Lcd.fillRect(1, indexRow, 2000, 10, WHITE);
+      M5.Lcd.setCursor(1, indexRow);
+      M5.Lcd.printf("Server wainti.");
       if ( nh.getHardware()->connected() ) {
-          M5.Lcd.fillRect(5, indexRow, 2000, 10, WHITE);
-          M5.Lcd.setCursor(5, indexRow);
+          M5.Lcd.fillRect(1, indexRow, 2000, 10, WHITE);
+          M5.Lcd.setCursor(1, indexRow);
           M5.Lcd.printf("Server connected.");
           delay(1000);
           indexRow += 10;
@@ -258,16 +262,16 @@ void setup()
   nh.advertise( publisher_imu );
   while ( not nh.connected() ) {
       nh.spinOnce();
-      M5.Lcd.fillRect(5, indexRow, 2000, 10, WHITE);
-      M5.Lcd.setCursor(5, indexRow);
-      M5.Lcd.printf("Wainting for Serial connection.");
+      M5.Lcd.fillRect(1, indexRow, 2000, 10, WHITE);
+      M5.Lcd.setCursor(1, indexRow);
+      M5.Lcd.printf("Serial conn. waitin.");
       for ( int i=0; i<10; i++ ) {
           delay(100);
           M5.Lcd.printf(".");
       }
   }
-  M5.Lcd.fillRect(5, indexRow, 2000, 10, WHITE);
-  M5.Lcd.setCursor(5, indexRow);
+  M5.Lcd.fillRect(1, indexRow, 2000, 10, WHITE);
+  M5.Lcd.setCursor(1, indexRow);
   M5.Lcd.printf("Serial connected.");
   indexRow += 10;
   delay(1000);
@@ -278,16 +282,16 @@ void setup()
   nh.advertise( publisher_imu );
   while ( not nh.connected() ) {
       nh.spinOnce();
-      M5.Lcd.fillRect(5, indexRow, 2000, 10, WHITE);
-      M5.Lcd.setCursor(5, indexRow);
-      M5.Lcd.printf("Wainting for Serial connection.");
+      M5.Lcd.fillRect(1, indexRow, 2000, 10, WHITE);
+      M5.Lcd.setCursor(1, indexRow);
+      M5.Lcd.printf("Serial conn. waitin.");
       for ( int i=0; i<10; i++ ) {
           delay(100);
           M5.Lcd.printf(".");
       }
   }
-  M5.Lcd.fillRect(5, indexRow, 2000, 10, WHITE);
-  M5.Lcd.setCursor(5, indexRow);
+  M5.Lcd.fillRect(1, indexRow, 2000, 10, WHITE);
+  M5.Lcd.setCursor(1, indexRow);
   M5.Lcd.printf("Serial connected.");
   indexRow += 10;
   delay(1000);
@@ -296,7 +300,7 @@ void setup()
   frame_id = (char*)malloc(BUFSIZE);
   char **hoge = &frame_id;
 
-  M5.Lcd.setCursor(5, indexRow);
+  M5.Lcd.setCursor(1, indexRow);
   M5.Lcd.printf("Requesting parameters.");
   nh.spinOnce();
   if ( not nh.getParam("~imu_frame_id", hoge, 1, 10000 ) ) {
@@ -304,13 +308,13 @@ void setup()
   if ( true ) {
   */
       strcpy( frame_id, "imu_frame" );
-      M5.Lcd.fillRect(5, indexRow, 2000, 10, WHITE);
-      M5.Lcd.setCursor(5, indexRow);
+      M5.Lcd.fillRect(1, indexRow, 2000, 10, WHITE);
+      M5.Lcd.setCursor(1, indexRow);
       M5.Lcd.printf("Parameter not found.");
       indexRow += 10;
   } else {
-      M5.Lcd.fillRect(5, indexRow, 2000, 10, WHITE);
-      M5.Lcd.setCursor(5, indexRow);
+      M5.Lcd.fillRect(1, indexRow, 2000, 10, WHITE);
+      M5.Lcd.setCursor(1, indexRow);
       M5.Lcd.printf("Parameter found.");
       indexRow += 10;
   }
@@ -335,8 +339,8 @@ void setup()
           &xHandle,
           1 );
 
-  M5.Lcd.setCursor(5, indexRow);
-  M5.Lcd.printf("Initialization finished. Main loop started.");
+  M5.Lcd.setCursor(1, indexRow);
+  M5.Lcd.printf("Init fin.");
   delay(1000);
   indexRow += 10;
 
@@ -353,8 +357,8 @@ void loop()
         vTaskDelayUntil( &xLastWakeTime, xFrequency );
 
         if ( counterROS % 100 == 0 ) {
-            M5.Lcd.fillRect(5, indexRow, 2000, 10, WHITE);
-            M5.Lcd.setCursor(5, indexRow);
+            M5.Lcd.fillRect(1, indexRow, 2000, 10, WHITE);
+            M5.Lcd.setCursor(1, indexRow);
             tempCounterROS = counterROS;
             tempCounterIMU = counterIMU;
             tempCounterPub = counterPub;
@@ -363,7 +367,7 @@ void loop()
             counterIMU = 0;
             counterPub = 0;
             counterCB = 0;
-            M5.Lcd.printf("[%5.1f s] ROS: %d, IMU: %d, Pub: %d, CB: %d\n", (millis() - startTime)*1.0/1000, tempCounterROS, tempCounterIMU, tempCounterPub, tempCounterCB );
+            M5.Lcd.printf("[%5.1f s] loop counter: %d", (millis() - startTime)*1.0/1000, tempCounterROS );
         }
         if ( xSemaphoreTake( xMutex, ( TickType_t ) duration_mutex ) == pdTRUE ) {
             counterPub++;

@@ -2,7 +2,7 @@
 #define VIBRATION_NAVIGATOR_FIRMWARE_UARTSERIAL_HARDWARE_H__
 
 // M5Stack and ESP32 headers
-#include <M5Stack.h>
+#include <M5StickC.h>
 
 class UARTSerialHardware {
 public:
