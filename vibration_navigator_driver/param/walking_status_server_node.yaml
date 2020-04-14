@@ -1,43 +1,43 @@
 !!python/object/new:dynamic_reconfigure.encoding.Config
 dictitems:
-  coef_acc_derivative_x: 0.0
+  coef_acc_derivative_x: 0.5
   coef_acc_derivative_y: 0.0
-  coef_acc_derivative_z: 0.0
-  coef_acc_x: 1.0
+  coef_acc_derivative_z: 0.5
+  coef_acc_x: 0.0
   coef_acc_y: 0.0
   coef_acc_z: 0.0
   coef_gyro_derivative_x: 0.0
   coef_gyro_derivative_y: 0.0
   coef_gyro_derivative_z: 0.0
-  coef_gyro_x: 200.0
-  coef_gyro_y: 200.0
-  coef_gyro_z: 200.0
+  coef_gyro_x: 0.0
+  coef_gyro_y: 1500.0
+  coef_gyro_z: 500.0
   groups: !!python/object/new:dynamic_reconfigure.encoding.Config
     dictitems:
-      coef_acc_derivative_x: 0.0
+      coef_acc_derivative_x: 0.5
       coef_acc_derivative_y: 0.0
-      coef_acc_derivative_z: 0.0
-      coef_acc_x: 1.0
+      coef_acc_derivative_z: 0.5
+      coef_acc_x: 0.0
       coef_acc_y: 0.0
       coef_acc_z: 0.0
       coef_gyro_derivative_x: 0.0
       coef_gyro_derivative_y: 0.0
       coef_gyro_derivative_z: 0.0
-      coef_gyro_x: 200.0
-      coef_gyro_y: 200.0
-      coef_gyro_z: 200.0
+      coef_gyro_x: 0.0
+      coef_gyro_y: 1500.0
+      coef_gyro_z: 500.0
       groups: !!python/object/new:dynamic_reconfigure.encoding.Config
         state: []
       id: 0
-      lpf_factor: 0.4
+      lpf_factor: 0.2
       name: Default
       parameters: !!python/object/new:dynamic_reconfigure.encoding.Config
         state: []
       parent: 0
       state: true
-      threshold: 10.0
+      threshold: 30.0
       type: ''
     state: []
-  lpf_factor: 0.4
-  threshold: 10.0
+  lpf_factor: 0.2
+  threshold: 30.0
 state: []
