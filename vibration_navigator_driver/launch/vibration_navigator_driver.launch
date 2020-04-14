@@ -4,9 +4,9 @@
 
     <arg name="PREFIX" default="vibration" />
 
-    <arg name="TOPIC_INPUT" default="$(arg PREFIX)_next_footstep" />
-    <arg name="TOPIC_COMMAND" default="$(arg PREFIX)_command" />
-    <arg name="TOPIC_IMU" default="$(arg PREFIX)_imu" />
+    <arg name="TOPIC_INPUT" default="$(arg PREFIX)/next_footstep" />
+    <arg name="TOPIC_COMMAND" default="$(arg PREFIX)/command" />
+    <arg name="TOPIC_IMU" default="$(arg PREFIX)/imu" />
 
     <arg name="FRAME_IMU" default="$(arg PREFIX)_imu_frame" />
     <arg name="FRAME_MARKER" default="$(arg PREFIX)_marker_frame" />
@@ -29,25 +29,25 @@
     <node
         name="$(arg PREFIX)_walking_status_server_node"
         pkg="vibration_navigator_driver"
-        type="walking_status_server_node"
+        type="walking_status_server_node.py"
         output="screen"
         >
-        <remap from="~input" to="$(arg TOPIC_INPUT)" />
+        <remap from="~imu" to="$(arg TOPIC_IMU)" />
 
         <rosparam>
             coef_acc_derivative_x: 0.0
             coef_acc_derivative_y: 0.0
             coef_acc_derivative_z: 0.0
-            coef_acc_x: 1.0
+            coef_acc_x: 0.5
             coef_acc_y: 0.0
-            coef_acc_z: 0.0
-            coef_gyro_derivative_x: 0.0
-            coef_gyro_derivative_y: 0.0
+            coef_acc_z: 0.5
+            coef_gyro_derivative_x: 1500
+            coef_gyro_derivative_y: 500
             coef_gyro_derivative_z: 0.0
-            coef_gyro_x: 200.0
-            coef_gyro_y: 200.0
-            coef_gyro_z: 200.0
-            lpf_factor: 0.4
+            coef_gyro_x: 0.0
+            coef_gyro_y: 0.0
+            coef_gyro_z: 0.0
+            lpf_factor: 0.3
             threshold: 10.0
         </rosparam>
     </node>
