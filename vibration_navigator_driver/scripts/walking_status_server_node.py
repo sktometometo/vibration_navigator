@@ -19,13 +19,20 @@ class WalkingStatusServer:
         rospy.init_node( 'walking_status_server_node' )
 
         # Static Parameter
-        hz_duration = rospy.get_param('~hz_duration', 3.0 )
+        hz_duration = rospy.get_param('~hz_duration', 5.0 )
+
+        self.buffer_acc_x_ = []
+        self.buffer_acc_y_ = []
+        self.buffer_acc_z_ = []
+        self.buffer_gyro_x_ = []
+        self.buffer_gyro_y_ = []
+        self.buffer_gyro_z_ = []
 
         # publish rate
         topic_hz = 0 # hz
         self.counter_ = 0
         sub = rospy.Subscriber( '~imu', Imu, self.callbackHz )
-        rospy.loginfo('Measuring publish rate...')
+        rospy.loginfo('Measuring publish rate of topic {}'.format(sub.resolved_name))
         rospy.sleep(hz_duration)
         if self.counter_ == 0:
             rospy.logerr('No message')
@@ -34,6 +41,14 @@ class WalkingStatusServer:
         sub.unregister()
         rospy.loginfo('Publish rate of {} is {} Hz'.format( '~imu', topic_hz) )
         self.publish_duration_ = 1.0 / topic_hz
+
+        #
+        self.ave_acc_x_ = np.average( np.array( self.buffer_acc_x_ ) )
+        self.ave_acc_y_ = np.average( np.array( self.buffer_acc_y_ ) )
+        self.ave_acc_z_ = np.average( np.array( self.buffer_acc_z_ ) )
+        self.ave_gyro_x_ = np.average( np.array( self.buffer_gyro_x_ ) )
+        self.ave_gyro_y_ = np.average( np.array( self.buffer_gyro_y_ ) )
+        self.ave_gyro_z_ = np.average( np.array( self.buffer_gyro_z_ ) )
 
         #
         self.server_cfg_ = Server( WalkingStatusServerConfig, self.callbackConfig )
@@ -62,6 +77,12 @@ class WalkingStatusServer:
     def callbackHz( self, msg ):
 
         self.counter_ += 1
+        self.buffer_acc_x_.append( msg.linear_acceleration.x )
+        self.buffer_acc_y_.append( msg.linear_acceleration.y )
+        self.buffer_acc_z_.append( msg.linear_acceleration.z )
+        self.buffer_gyro_x_.append( msg.angular_velocity.x )
+        self.buffer_gyro_y_.append( msg.angular_velocity.y )
+        self.buffer_gyro_z_.append( msg.angular_velocity.z )
 
     def callbackConfig( self, config, level ):
 
@@ -86,36 +107,43 @@ class WalkingStatusServer:
 
     def callback( self, msg ):
 
-        derivative_acc_x = ( msg.linear_acceleration.x - self.prev_acc_x_ ) / self.publish_duration_
-        derivative_acc_y = ( msg.linear_acceleration.y - self.prev_acc_y_ ) / self.publish_duration_
-        derivative_acc_z = ( msg.linear_acceleration.z - self.prev_acc_z_ ) / self.publish_duration_
-        derivative_gyro_x = ( msg.angular_velocity.x - self.prev_gyro_x_ ) / self.publish_duration_
-        derivative_gyro_y = ( msg.angular_velocity.y - self.prev_gyro_y_ ) / self.publish_duration_
-        derivative_gyro_z = ( msg.angular_velocity.z - self.prev_gyro_z_ ) / self.publish_duration_
+        acc_x = msg.linear_acceleration.x - self.ave_acc_x_
+        acc_y = msg.linear_acceleration.y - self.ave_acc_y_
+        acc_z = msg.linear_acceleration.z - self.ave_acc_z_
+        gyro_x = msg.angular_velocity.x - self.ave_gyro_x_
+        gyro_y = msg.angular_velocity.y - self.ave_gyro_y_
+        gyro_z = msg.angular_velocity.z - self.ave_gyro_z_
 
-        self.prev_acc_x_ = msg.linear_acceleration.x
-        self.prev_acc_y_ = msg.linear_acceleration.y
-        self.prev_acc_z_ = msg.linear_acceleration.z
-        self.prev_gyro_x_ = msg.angular_velocity.x
-        self.prev_gyro_y_ = msg.angular_velocity.y
-        self.prev_gyro_z_ = msg.angular_velocity.z
+        derivative_acc_x = ( acc_x - self.prev_acc_x_ ) / self.publish_duration_
+        derivative_acc_y = ( acc_y - self.prev_acc_y_ ) / self.publish_duration_
+        derivative_acc_z = ( acc_z - self.prev_acc_z_ ) / self.publish_duration_
+        derivative_gyro_x = ( gyro_x - self.prev_gyro_x_ ) / self.publish_duration_
+        derivative_gyro_y = ( gyro_y - self.prev_gyro_y_ ) / self.publish_duration_
+        derivative_gyro_z = ( gyro_z - self.prev_gyro_z_ ) / self.publish_duration_
+
+        self.prev_acc_x_ = acc_x
+        self.prev_acc_y_ = acc_y
+        self.prev_acc_z_ = acc_z
+        self.prev_gyro_x_ = gyro_x
+        self.prev_gyro_y_ = gyro_y
+        self.prev_gyro_z_ = gyro_z
         self.prev_timestamp_ = msg.header.stamp
 
-        score_cur = self.parameter_coef_acc_x_ * abs( msg.linear_acceleration.x ) \
-                  + self.parameter_coef_acc_y_ * abs( msg.linear_acceleration.y ) \
-                  + self.parameter_coef_acc_z_ * abs( msg.linear_acceleration.z ) \
+        score_cur = self.parameter_coef_acc_x_ * abs( acc_x ) \
+                  + self.parameter_coef_acc_y_ * abs( acc_y ) \
+                  + self.parameter_coef_acc_z_ * abs( acc_z ) \
                   + self.parameter_coef_acc_d_x_ * abs( derivative_acc_x ) \
                   + self.parameter_coef_acc_d_y_ * abs( derivative_acc_y ) \
                   + self.parameter_coef_acc_d_z_ * abs( derivative_acc_z ) \
-                  + self.parameter_coef_gyro_x_ * abs( msg.angular_velocity.x ) \
-                  + self.parameter_coef_gyro_y_ * abs( msg.angular_velocity.y ) \
-                  + self.parameter_coef_gyro_z_ * abs( msg.angular_velocity.z ) \
+                  + self.parameter_coef_gyro_x_ * abs( gyro_x ) \
+                  + self.parameter_coef_gyro_y_ * abs( gyro_y ) \
+                  + self.parameter_coef_gyro_z_ * abs( gyro_z ) \
                   + self.parameter_coef_gyro_d_x_ * abs( derivative_gyro_x ) \
                   + self.parameter_coef_gyro_d_y_ * abs( derivative_gyro_y ) \
                   + self.parameter_coef_gyro_d_z_ * abs( derivative_gyro_z )
 
         score = self.parameter_lpf_factor_ * score_cur + ( 1 - self.parameter_lpf_factor_ ) * self.prev_score_
-        self.prev_score_ = score_cur
+        self.prev_score_ = score
 
         self.msg_score_.data = score
 
