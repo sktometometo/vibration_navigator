@@ -4,8 +4,6 @@
 
     <arg name="PREFIX" default="vibration" />
 
-    <arg name="USE_ROSSERIAL" defalut="true" />
-
     <arg name="TOPIC_INPUT" default="$(arg PREFIX)/next_footstep" />
     <arg name="TOPIC_COMMAND" default="$(arg PREFIX)/command" />
     <arg name="TOPIC_IMU" default="$(arg PREFIX)/imu" />
@@ -18,7 +16,6 @@
         pkg="rosserial_python"
         type="serial_node.py"
         output="screen"
-        if="$(arg USE_ROSSERIAL)"
         >
         <param name="~port" value="$(arg PORT)" />
         <param name="~baud" value="$(arg BAUD)" />
