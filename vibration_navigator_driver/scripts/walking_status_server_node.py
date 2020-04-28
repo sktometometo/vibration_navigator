@@ -31,6 +31,7 @@ class WalkingStatusServer:
         # publish rate
         topic_hz = 0 # hz
         self.counter_ = 0
+        rospy.wait_for_message('~imu', Imu)
         sub = rospy.Subscriber( '~imu', Imu, self.callbackHz )
         rospy.loginfo('Measuring publish rate of topic {}'.format(sub.resolved_name))
         rospy.sleep(hz_duration)
