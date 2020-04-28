@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
     tf2
     tf2_ros
     tf2_geometry_msgs
+    vibration_navigator_msgs
 )
 
 find_package(Boost REQUIRED
@@ -37,6 +38,7 @@ catkin_package(
         tf2
         tf2_ros
         tf2_geometry_msgs
+        vibration_navigator_msgs
     DEPENDS
         Boost
         EIGEN3
@@ -57,6 +59,19 @@ add_executable(
 )
 target_link_libraries(
     vibration_controller_node
+    ${catkin_LIBRARIES}
+    ${Boost_LIBRARIES}
+    ${EIGEN3_LIBRARIES}
+)
+
+#
+add_executable(
+    contact_tf_publisher_node
+    src/contact_tf_publisher_node.cpp
+    src/contact_tf_publisher.cpp
+)
+target_link_libraries(
+    contact_tf_publisher_node
     ${catkin_LIBRARIES}
     ${Boost_LIBRARIES}
     ${EIGEN3_LIBRARIES}
