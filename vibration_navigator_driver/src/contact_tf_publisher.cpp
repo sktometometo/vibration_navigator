@@ -47,6 +47,7 @@ namespace vibration_navigator_driver {
          *
          */
         this->walking_status_ = vibration_navigator_msgs::WalkingStatus::STANCE;
+        this->initialized_ = false;
 
         ROS_INFO("Initialization finished.");
     }
@@ -61,19 +62,25 @@ namespace vibration_navigator_driver {
         if ( this->walking_status_ != vibration_navigator_msgs::WalkingStatus::STANCE and
                 msg.phase == vibration_navigator_msgs::WalkingStatus::STANCE ) {
             try {
-                geometry_msgs::TransformStamped transform =
+                this->transform_msg_ =
                     this->tf_buffer_.lookupTransform(
                             this->fixed_frame_id_,
                             this->reference_frame_id_,
                             ros::Time(0),
                             this->duration_timeout_
                             );
-                transform.child_frame_id = this->output_frame_id_;
-                transform.header.stamp = ros::Time::now();
-                this->tf_broadcaster_.sendTransform(transform);
+                this->transform_msg_.child_frame_id = this->output_frame_id_;
+                if ( not this->initialized_ ) {
+                    this->initialized_ = true;
+                }
             } catch (tf2::TransformException &ex) {
-                ROS_DEBUG("%s",ex.what());
+                ROS_WARN("%s",ex.what());
             }
+        }
+
+        if ( this->initialized_ ) {
+            this->transform_msg_.header.stamp = ros::Time::now();
+            this->tf_broadcaster_.sendTransform(this->transform_msg_);
         }
 
         this->walking_status_ = msg.phase;

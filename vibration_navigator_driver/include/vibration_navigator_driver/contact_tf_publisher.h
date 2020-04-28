@@ -53,7 +53,11 @@ namespace vibration_navigator_driver {
             std::string fixed_frame_id_;
             ros::Duration duration_timeout_;
 
+            geometry_msgs::TransformStamped transform_msg_;
+
             int walking_status_;
+
+            bool initialized_;
 
             /**
              *
