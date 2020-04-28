@@ -41,7 +41,7 @@ namespace vibration_navigator_driver {
         }
         this->duration_timeout_ = ros::Duration(timeout);
 
-        this->sub_walkingstatus_ = this->nh_.subscribe("walking_status", 1000, &ContactTFPublisher::callbackSub, this );
+        this->sub_walkingstatus_ = this->nh_private_.subscribe("walking_status", 1000, &ContactTFPublisher::callbackSub, this );
 
         /**
          *
