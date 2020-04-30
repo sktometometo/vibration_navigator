@@ -1,8 +1,4 @@
 //
-//#define M5STACK_200Q
-//// M5Stack and ESP32 headers
-//#include <M5Stack.h>
-#include <M5StickC.h>
 // ROS related headers
 #include <ros.h>
 #include <sensor_msgs/Imu.h>
@@ -12,7 +8,21 @@
 #define BUFSIZE 1024
 
 // #define USE_BLUETOOTH
-// #define USE_WIFI
+#define USE_WIFI
+
+#define USE_M5STACK
+// #define USE_M5STICK_C
+
+//// M5Stack and ESP32 headers
+#ifdef USE_M5STACK
+#define M5STACK_200Q
+#include <M5Stack.h>
+#endif
+
+#ifdef USE_M5STICK_C
+#include <M5StickC.h>
+#endif
+
 
 #ifdef USE_BLUETOOTH
 #include "bluetooth_hardware.h"
@@ -30,11 +40,11 @@ void callbackVibrationCommands( const std_msgs::UInt16MultiArray& );
 
 // parameters
 #ifdef USE_WIFI
-const char* ssid = "RichardPhillipsFeynman";
-const char* password = "joshin412403";
-IPAddress server(192,168,10,53);
+const char* ssid = "FlyingSpaghettiMonster";
+const char* password = "qQOjiUls";
+IPAddress server(10,42,0,1);
 #elif defined(USE_BLUETOOTH)
-char* BluetoothName = "VibrationNavigator";
+char* BluetoothName = "VibrationNavigatorLeft";
 #endif
 int duration_loop = 10; // [ms]
 int duration_imu = 10;
@@ -164,7 +174,9 @@ void setup()
    * M5 Stack initialization
    */
   M5.begin();
-  //M5.Power.begin();
+#ifdef USE_M5STACK
+  M5.Power.begin();
+#endif
   M5.IMU.Init();
 
   /**
@@ -192,7 +204,12 @@ void setup()
    */
   M5.Lcd.fillRect(1, indexRow, 2000, 10, WHITE);
   M5.Lcd.setCursor(1, indexRow);
+#ifdef USE_M5STICK_C
   M5.Lcd.printf("Bat. Vol.: %.1f V", M5.Axp.GetBatVoltage());
+#endif
+#ifdef USE_M5STACK
+  M5.Lcd.printf("Battery Level: %d \%", M5.Power.getBatteryLevel());
+#endif
   indexRow += 10;
   delay(1000);
 
@@ -220,11 +237,20 @@ void setup()
   while ( status  != WL_CONNECTED ) {
       M5.Lcd.fillRect(1, indexRow, 2000, 10, WHITE);
       M5.Lcd.setCursor(1, indexRow);
+#ifdef USE_M5STICK_C
       M5.Lcd.printf("WiFiCon. waiting...");
       for ( int i=0; i<10; i++ ) {
           delay(100);
           M5.Lcd.printf(".");
       }
+#endif
+#ifdef USE_M5STACK
+      M5.Lcd.printf("WiFi connecting to %s .", ssid);
+      for ( int i=0; i<10; i++ ) {
+          delay(100);
+          M5.Lcd.printf(".");
+      }
+#endif
       status = WiFi.begin(ssid,password);
   }
   M5.Lcd.fillRect(1, indexRow, 2000, 10, WHITE);
