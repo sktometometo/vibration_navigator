@@ -8,7 +8,7 @@
 #define BUFSIZE 1024
 
 // #define USE_BLUETOOTH
-#define USE_WIFI
+// #define USE_WIFI
 
 #define USE_M5STACK
 // #define USE_M5STICK_C
@@ -42,7 +42,7 @@ void callbackVibrationCommands( const std_msgs::UInt16MultiArray& );
 #ifdef USE_WIFI
 const char* ssid = "";
 const char* password = "";
-IPAddress server(0,0,0,0);
+IPAddress server(,,,);
 #elif defined(USE_BLUETOOTH)
 char* BluetoothName = "VibrationNavigator";
 #endif
@@ -190,7 +190,9 @@ void setup()
   /**
    * Lcd display
    */
+#ifdef USE_M5STICK_C
   M5.Lcd.setRotation(3);
+#endif
   M5.Lcd.fillScreen(WHITE);
   M5.Lcd.setTextColor(BLACK);
   M5.Lcd.setCursor(1, indexRow);
