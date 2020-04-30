@@ -40,11 +40,11 @@ void callbackVibrationCommands( const std_msgs::UInt16MultiArray& );
 
 // parameters
 #ifdef USE_WIFI
-const char* ssid = "FlyingSpaghettiMonster";
-const char* password = "qQOjiUls";
-IPAddress server(10,42,0,1);
+const char* ssid = "";
+const char* password = "";
+IPAddress server(0,0,0,0);
 #elif defined(USE_BLUETOOTH)
-char* BluetoothName = "VibrationNavigatorLeft";
+char* BluetoothName = "VibrationNavigator";
 #endif
 int duration_loop = 10; // [ms]
 int duration_imu = 10;
