@@ -8,6 +8,7 @@
     <arg name="TOPIC_COMMAND" default="$(arg PREFIX)/command" /> <!-- internal -->
     <arg name="TOPIC_IMU" default="$(arg PREFIX)/imu" /> <!-- output -->
     <arg name="TOPIC_WALKING_STATUS" default="$(arg PREFIX)/status" />
+    <arg name="TOPIC_SCORE" default="$(arg PREFIX)/score" /> <!-- output -->
 
     <arg name="FRAME_IMU" default="$(arg PREFIX)_imu_frame" /> <!-- input -->
     <arg name="FRAME_MARKER" default="$(arg PREFIX)_marker_frame" /> <!-- input -->
@@ -35,6 +36,7 @@
         >
         <remap from="~imu" to="$(arg TOPIC_IMU)" />
         <remap from="~status" to="$(arg TOPIC_WALKING_STATUS)" />
+        <remap from="~score" to="$(arg TOPIC_SCORE)" />
 
         <rosparam>
             coef_acc_derivative_x: 0.0
