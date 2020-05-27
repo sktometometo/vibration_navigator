@@ -11,23 +11,23 @@
 // #define USE_WIFI
 
 #define USE_M5STACK
+// #define USE_M5STACK_FIRE
 // #define USE_M5STICK_C
 
 //// M5Stack and ESP32 headers
 #ifdef USE_M5STACK
+#define M5STACK_MPU6886
+#include <M5Stack.h>
+#elif USE_M5STACK_FIRE
 #define M5STACK_200Q
 #include <M5Stack.h>
-#endif
-
-#ifdef USE_M5STICK_C
+#elif USE_M5STICK_C
 #include <M5StickC.h>
 #endif
-
 
 #ifdef USE_BLUETOOTH
 #include "bluetooth_hardware.h"
 #endif
-
 #ifndef USE_WIFI
 #include "uartserial_hardware.h"
 #endif
@@ -174,7 +174,7 @@ void setup()
    * M5 Stack initialization
    */
   M5.begin();
-#ifdef USE_M5STACK
+#ifdef defined(USE_M5STACK) || defined(USE_M5STACK_FIRE)
   M5.Power.begin();
 #endif
   M5.IMU.Init();
@@ -208,8 +208,7 @@ void setup()
   M5.Lcd.setCursor(1, indexRow);
 #ifdef USE_M5STICK_C
   M5.Lcd.printf("Bat. Vol.: %.1f V", M5.Axp.GetBatVoltage());
-#endif
-#ifdef USE_M5STACK
+#elif defined(USE_M5STACK) || defined(USE_M5STACK_FIRE)
   M5.Lcd.printf("Battery Level: %d \%", M5.Power.getBatteryLevel());
 #endif
   indexRow += 10;
@@ -245,8 +244,7 @@ void setup()
           delay(100);
           M5.Lcd.printf(".");
       }
-#endif
-#ifdef USE_M5STACK
+#elif defined(USE_M5STACK) || defined(USE_M5STACK_FIRE)
       M5.Lcd.printf("WiFi connecting to %s .", ssid);
       for ( int i=0; i<10; i++ ) {
           delay(100);
