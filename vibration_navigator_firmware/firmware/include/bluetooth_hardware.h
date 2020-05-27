@@ -2,14 +2,16 @@
 #define VIBRATION_NAVIGATOR_FIRMWARE_BLUETOOTH_HARDWARE_H__
 
 // M5Stack and ESP32 headers
-#ifdef USE_M5STACK
+#if TYPE_M5STACK == 0
+#define M5STACK_MPU6886
+#include <M5Stack.h>
+#elif TYPE_M5STACK == 1
 #define M5STACK_200Q
 #include <M5Stack.h>
-#endif
-
-#ifdef USE_M5STICK_C
+#elif TYPE_M5STACK == 2
 #include <M5StickC.h>
 #endif
+
 #include "BluetoothSerial.h"
 
 class BluetoothHardware {

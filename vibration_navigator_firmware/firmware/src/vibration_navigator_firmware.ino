@@ -7,29 +7,27 @@
 
 #define BUFSIZE 1024
 
-// #define USE_BLUETOOTH
-// #define USE_WIFI
+#define SERIAL_MODE 0 // 0: USB, 1: BLUETOOTH, 2: WIFI
+#define TYPE_M5STACK 0 // 0: M5Stack_gray, 1: M5Stack_fire, 2: M5Stick-c
 
-#define USE_M5STACK
-// #define USE_M5STACK_FIRE
-// #define USE_M5STICK_C
+
+
 
 //// M5Stack and ESP32 headers
-#ifdef USE_M5STACK
+#if TYPE_M5STACK == 0 // M5Stack_gray
 #define M5STACK_MPU6886
 #include <M5Stack.h>
-#elif USE_M5STACK_FIRE
+#elif TYPE_M5STACK == 1 // M5Stack_fire
 #define M5STACK_200Q
 #include <M5Stack.h>
-#elif USE_M5STICK_C
+#elif TYPE_M5STACK == 2 // M5Stick-c
 #include <M5StickC.h>
 #endif
 
-#ifdef USE_BLUETOOTH
-#include "bluetooth_hardware.h"
-#endif
-#ifndef USE_WIFI
+#if SERIAL_MODE == 0 // USB
 #include "uartserial_hardware.h"
+#elif SERIAL_MODE == 1 // BLUETOOTH
+#include "bluetooth_hardware.h"
 #endif
 
 //
@@ -39,25 +37,29 @@ const float const_g = 9.8;
 void callbackVibrationCommands( const std_msgs::UInt16MultiArray& );
 
 // parameters
-#ifdef USE_WIFI
+#if SERIAL_MODE == 0 // USB
+#elif SERIAL_MODE == 1 // BLUETOOTH
+char* BluetoothName = "VibrationNavigator";
+#elif SERIAL_MODE == 2 // WIFI
 const char* ssid = "";
 const char* password = "";
 IPAddress server(,,,);
-#elif defined(USE_BLUETOOTH)
-char* BluetoothName = "VibrationNavigator";
 #endif
+
 int duration_loop = 10; // [ms]
 int duration_imu = 10;
 int duration_mutex = 5;
 
 // ROSresources
-#ifdef USE_WIFI
-ros::NodeHandle nh;
-#elif defined(USE_BLUETOOTH)
-ros::NodeHandle_<BluetoothHardware> nh;
-#else
+
+#if SERIAL_MODE == 0 // USB
 ros::NodeHandle_<UARTSerialHardware, 25, 25, 4096, 4096> nh;
+#elif SERIAL_MODE == 1 // BLUETOOTH
+ros::NodeHandle_<BluetoothHardware> nh;
+#elif SERIAL_MODE == 2 // WIFI
+ros::NodeHandle nh;
 #endif
+
 std_msgs::UInt16MultiArray msg_vibration_commands;
 sensor_msgs::Imu msg_imu;
 ros::Subscriber<std_msgs::UInt16MultiArray> subscriber_vibration_commands( "~commands", &callbackVibrationCommands);
@@ -174,7 +176,9 @@ void setup()
    * M5 Stack initialization
    */
   M5.begin();
-#ifdef defined(USE_M5STACK) || defined(USE_M5STACK_FIRE)
+#if TYPE_M5STACK == 0 // M5Stack_gray
+  M5.Power.begin();
+#elif TYPE_M5STACK == 1 // M5Stack_fire
   M5.Power.begin();
 #endif
   M5.IMU.Init();
@@ -190,7 +194,7 @@ void setup()
   /**
    * Lcd display
    */
-#ifdef USE_M5STICK_C
+#if TYPE_M5STACK == 2 // M5Stick-c
   M5.Lcd.setRotation(3);
 #endif
   M5.Lcd.fillScreen(WHITE);
@@ -206,46 +210,77 @@ void setup()
    */
   M5.Lcd.fillRect(1, indexRow, 2000, 10, WHITE);
   M5.Lcd.setCursor(1, indexRow);
-#ifdef USE_M5STICK_C
-  M5.Lcd.printf("Bat. Vol.: %.1f V", M5.Axp.GetBatVoltage());
-#elif defined(USE_M5STACK) || defined(USE_M5STACK_FIRE)
+#if TYPE_M5STACK == 0 // M5Stack_gray
   M5.Lcd.printf("Battery Level: %d \%", M5.Power.getBatteryLevel());
+#elif TYPE_M5STACK == 1 // M5Stack_fire
+  M5.Lcd.printf("Battery Level: %d \%", M5.Power.getBatteryLevel());
+#elif TYPE_M5STACK == 2 // M5Stick-c
+  M5.Lcd.printf("Bat. Vol.: %.1f V", M5.Axp.GetBatVoltage());
 #endif
   indexRow += 10;
   delay(1000);
 
   /**
-   * Deep sleeping...
-   */
-  /*
-  if ( M5.Power.getBatteryLevel() < 10 ) {
-      M5.Lcd.fillRect(1, indexRow, 2000, 10, WHITE);
-      M5.Lcd.setCursor(1, indexRow);
-      M5.Lcd.printf("Deep sleeping....");
-      indexRow += 10;
-      delay(5000);
-      while ( true ) {
-          M5.Power.deepSleep( 10000 );
-      }
-  }
-  */
-
-  /**
    * ROS Initialization
    */
-#ifdef USE_WIFI
-  int status = WiFi.begin(ssid,password);
-  while ( status  != WL_CONNECTED ) {
+#if SERIAL_MODE == 0 // USB
+  Serial.begin(115200);
+  nh.initNode();
+  nh.subscribe( subscriber_vibration_commands );
+  nh.advertise( publisher_imu );
+  while ( not nh.connected() ) {
+      nh.spinOnce();
       M5.Lcd.fillRect(1, indexRow, 2000, 10, WHITE);
       M5.Lcd.setCursor(1, indexRow);
-#ifdef USE_M5STICK_C
-      M5.Lcd.printf("WiFiCon. waiting...");
+      M5.Lcd.printf("Serial conn. waitin.");
       for ( int i=0; i<10; i++ ) {
           delay(100);
           M5.Lcd.printf(".");
       }
-#elif defined(USE_M5STACK) || defined(USE_M5STACK_FIRE)
+  }
+  M5.Lcd.fillRect(1, indexRow, 2000, 10, WHITE);
+  M5.Lcd.setCursor(1, indexRow);
+  M5.Lcd.printf("Serial connected.");
+  indexRow += 10;
+  delay(1000);
+#elif SERIAL_MODE == 1 // BLUETOOTH
+  nh.initNode( BluetoothName );
+  nh.subscribe( subscriber_vibration_commands );
+  nh.advertise( publisher_imu );
+  while ( not nh.connected() ) {
+      nh.spinOnce();
+      M5.Lcd.fillRect(1, indexRow, 2000, 10, WHITE);
+      M5.Lcd.setCursor(1, indexRow);
+      M5.Lcd.printf("Serial conn. waitin.");
+      for ( int i=0; i<10; i++ ) {
+          delay(100);
+          M5.Lcd.printf(".");
+      }
+  }
+  M5.Lcd.fillRect(1, indexRow, 2000, 10, WHITE);
+  M5.Lcd.setCursor(1, indexRow);
+  M5.Lcd.printf("Serial connected.");
+  indexRow += 10;
+  delay(1000);
+#elif SERIAL_MODE == 2 // WIFI
+  int status = WiFi.begin(ssid,password);
+  while ( status  != WL_CONNECTED ) {
+      M5.Lcd.fillRect(1, indexRow, 2000, 10, WHITE);
+      M5.Lcd.setCursor(1, indexRow);
+#if TYPE_M5STACK == 0 // M5Stack_gray
       M5.Lcd.printf("WiFi connecting to %s .", ssid);
+      for ( int i=0; i<10; i++ ) {
+          delay(100);
+          M5.Lcd.printf(".");
+      }
+#elif TYPE_M5STACK == 1 // M5Stack_fire
+      M5.Lcd.printf("WiFi connecting to %s .", ssid);
+      for ( int i=0; i<10; i++ ) {
+          delay(100);
+          M5.Lcd.printf(".");
+      }
+#elif TYPE_M5STACK == 2 // M5Stick-c
+      M5.Lcd.printf("WiFiCon. waiting...");
       for ( int i=0; i<10; i++ ) {
           delay(100);
           M5.Lcd.printf(".");
@@ -282,45 +317,6 @@ void setup()
           }
       }
   }
-#elif defined(USE_BLUETOOTH)
-  nh.initNode( BluetoothName );
-  nh.subscribe( subscriber_vibration_commands );
-  nh.advertise( publisher_imu );
-  while ( not nh.connected() ) {
-      nh.spinOnce();
-      M5.Lcd.fillRect(1, indexRow, 2000, 10, WHITE);
-      M5.Lcd.setCursor(1, indexRow);
-      M5.Lcd.printf("Serial conn. waitin.");
-      for ( int i=0; i<10; i++ ) {
-          delay(100);
-          M5.Lcd.printf(".");
-      }
-  }
-  M5.Lcd.fillRect(1, indexRow, 2000, 10, WHITE);
-  M5.Lcd.setCursor(1, indexRow);
-  M5.Lcd.printf("Serial connected.");
-  indexRow += 10;
-  delay(1000);
-#else
-  Serial.begin(115200);
-  nh.initNode();
-  nh.subscribe( subscriber_vibration_commands );
-  nh.advertise( publisher_imu );
-  while ( not nh.connected() ) {
-      nh.spinOnce();
-      M5.Lcd.fillRect(1, indexRow, 2000, 10, WHITE);
-      M5.Lcd.setCursor(1, indexRow);
-      M5.Lcd.printf("Serial conn. waitin.");
-      for ( int i=0; i<10; i++ ) {
-          delay(100);
-          M5.Lcd.printf(".");
-      }
-  }
-  M5.Lcd.fillRect(1, indexRow, 2000, 10, WHITE);
-  M5.Lcd.setCursor(1, indexRow);
-  M5.Lcd.printf("Serial connected.");
-  indexRow += 10;
-  delay(1000);
 #endif
 
   frame_id = (char*)malloc(BUFSIZE);
