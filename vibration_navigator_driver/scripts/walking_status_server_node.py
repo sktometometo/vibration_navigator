@@ -8,7 +8,7 @@ import math
 import sys
 from geometry_msgs.msg import Quaternion, TransformStamped
 from sensor_msgs.msg import Imu
-from std_msgs.msg import Float64
+from std_msgs.msg import Float32
 from vibration_navigator_driver.cfg import WalkingStatusServerConfig
 from vibration_navigator_msgs.msg import WalkingStatus
 
@@ -57,11 +57,11 @@ class WalkingStatusServer:
         # callback registration
         self.subscriber_ = rospy.Subscriber( '~imu', Imu, self.callback )
         self.publisher_status_ = rospy.Publisher( '~status', WalkingStatus, queue_size=10 )
-        self.publisher_score_ = rospy.Publisher( '~score', Float64, queue_size=10 )
+        self.publisher_score_ = rospy.Publisher( '~score', Float32, queue_size=10 )
 
         # ROS message
         self.msg_status_ = WalkingStatus()
-        self.msg_score_ = Float64()
+        self.msg_score_ = Float32()
 
         #
         self.prev_timestamp_ = rospy.Time.now()
